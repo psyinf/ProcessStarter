@@ -18,7 +18,7 @@ processLib::ExitCode processLib::Process::stop()
     return _process->stop();
 }
 
-std::future<processLib::ExitCode> processLib::Process::wait()
+std::future<processLib::ExitCode> processLib::Process::wait(std::chrono::system_clock::duration timeout)
 {
-    return _process->wait();
+    return _process->wait(timeout);
 }

@@ -20,7 +20,10 @@ public:
 
     processLib::ExitCode stop() { return static_cast<Derived*>(this)->stopImpl(); }
 
-    std::future<processLib::ExitCode> wait() { return static_cast<Derived*>(this)->wait(); }
+    std::future<processLib::ExitCode> wait(std::chrono::system_clock::duration timeout)
+    {
+        return static_cast<Derived*>(this)->wait(timeout);
+    }
 
     processLib::ProcessConfig _config;
 };
@@ -66,10 +69,11 @@ public:
         return _exit_code;
     }
 
-    std::future<processLib::ExitCode> wait()
+    std::future<processLib::ExitCode> wait(std::chrono::system_clock::duration timeout)
     {
-        return std::async(std::launch::async, [this]() {
-            WaitForSingleObject(_process_info.hProcess, INFINITE);
+        return std::async(std::launch::async, [this, timeout]() {
+            WaitForSingleObject(_process_info.hProcess,
+                                std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
 
             GetExitCodeProcess(_process_info.hProcess, &_exit_code);
             return _exit_code;

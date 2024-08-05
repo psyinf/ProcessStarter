@@ -20,7 +20,8 @@ public:
     Process(const std::string& name, const Arguments& arguments);
     void                  start();
     ExitCode              stop();
-    std::future<ExitCode> wait();
+    std::future<ExitCode> wait(
+        std::chrono::system_clock::duration timeout = std::chrono::system_clock::duration::max());
 
 private:
     ProcessConfig    _config;

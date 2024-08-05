@@ -2,9 +2,10 @@
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
-    processLib::Process process(std::string("ping"), processLib::Arguments{"localhost"});
+    using namespace std::chrono_literals;
+    processLib::Process process(std::string("ping"), processLib::Arguments{"localhost", "-t"});
     process.start();
-    process.wait().get();
+    process.wait(10s).get();
 
     return 0;
 }
