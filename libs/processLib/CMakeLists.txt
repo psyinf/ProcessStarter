@@ -1,4 +1,4 @@
-project(sampleLib)
+project(processLib)
 
 add_library(${PROJECT_NAME} STATIC)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
