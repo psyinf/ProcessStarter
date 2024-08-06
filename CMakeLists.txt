@@ -16,6 +16,7 @@ include(cmake/deps_cpm.cmake)
 
 add_subdirectory(libs)
 add_subdirectory(apps)
+add_subdirectory(examples)
 
 if (ENABLE_TESTING)
     enable_testing()

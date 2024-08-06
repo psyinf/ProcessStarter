@@ -8,6 +8,11 @@ processLib::Process::Process(const std::string& name, const Arguments& arguments
 {
 }
 
+processLib::Process::~Process()
+{
+    if (!getExitCode().has_value()) { stop(); }
+}
+
 void processLib::Process::start()
 {
     _process->start();
@@ -18,7 +23,17 @@ processLib::ExitCode processLib::Process::stop()
     return _process->stop();
 }
 
-std::future<processLib::ExitCode> processLib::Process::wait(std::chrono::system_clock::duration timeout)
+std::future<processLib::OptionalExitCode> processLib::Process::wait(std::chrono::system_clock::duration timeout)
 {
     return _process->wait(timeout);
+}
+
+std::optional<processLib::ExitCode> processLib::Process::getExitCode() const
+{
+    return _process->getExitCode();
+}
+
+bool processLib::Process::isRunning() const
+{
+    return _process->isRunning();
 }

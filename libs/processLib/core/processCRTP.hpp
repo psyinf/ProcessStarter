@@ -25,6 +25,8 @@ public:
         return static_cast<Derived*>(this)->wait(timeout);
     }
 
+    bool isRunning() const { return static_cast<const Derived*>(this)->isRunningImpl(); }
+
     processLib::ProcessConfig _config;
 };
 
@@ -41,6 +43,8 @@ class Process : public ProcessCRTP<Process>
 {
 public:
     using ProcessCRTP::ProcessCRTP;
+
+    ~Process() = default;
 
     void startImpl()
     {
@@ -65,24 +69,56 @@ public:
 
     processLib::ExitCode stopImpl()
     {
-        TerminateProcess(_process_info.hProcess, _exit_code);
-        return _exit_code;
+        processLib::ExitCode exit_code{};
+        TerminateProcess(_process_info.hProcess, exit_code);
+        _exit_code = exit_code;
+        return exit_code;
     }
 
-    std::future<processLib::ExitCode> wait(std::chrono::system_clock::duration timeout)
+    std::future<processLib::OptionalExitCode> wait(std::chrono::system_clock::duration timeout)
     {
         return std::async(std::launch::async, [this, timeout]() {
-            WaitForSingleObject(_process_info.hProcess,
-                                std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+            auto wait_result = WaitForSingleObject(
+                _process_info.hProcess, std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
 
-            GetExitCodeProcess(_process_info.hProcess, &_exit_code);
+            switch (wait_result)
+            {
+            case WAIT_OBJECT_0: {
+                processLib::ExitCode exit_code{};
+                GetExitCodeProcess(_process_info.hProcess, &exit_code);
+                CloseHandle(_process_info.hProcess);
+                CloseHandle(_process_info.hThread);
+                _exit_code = exit_code;
+            }
+            break;
+            case WAIT_TIMEOUT: {
+                if (_config.policies.stopOnWait) { stopImpl(); };
+            }
+            break;
+            case WAIT_FAILED:
+                // TODO: policy to control if we throw here or return an error code
+                break;
+
+            default:
+                break;
+            }
             return _exit_code;
         });
     }
 
+    std::optional<processLib::ExitCode> getExitCode() const { return _exit_code; }
+
+    bool isRunningImpl() const
+    {
+        DWORD exit_code;
+        GetExitCodeProcess(_process_info.hProcess, &exit_code);
+        return exit_code == STILL_ACTIVE;
+    }
+
 private:
-    PROCESS_INFORMATION  _process_info = {0};
-    processLib::ExitCode _exit_code = 0;
+    PROCESS_INFORMATION _process_info = {0};
+
+    std::optional<processLib::ExitCode> _exit_code = std::nullopt;
 };
 #endif
 } // namespace detail
