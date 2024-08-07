@@ -39,6 +39,22 @@ LPSTR fromString(const std::string& str)
     else { return const_cast<LPSTR>(str.c_str()); }
 }
 
+std::string lastErrorToString(DWORD error_code)
+{
+    LPSTR buffer = nullptr;
+    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS |
+                      FORMAT_MESSAGE_MAX_WIDTH_MASK,
+                  nullptr,
+                  error_code,
+                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                  (LPSTR)&buffer,
+                  0,
+                  nullptr);
+    std::string message(buffer);
+    LocalFree(buffer);
+    return message;
+}
+
 class Process : public ProcessCRTP<Process>
 {
 public:
@@ -70,7 +86,9 @@ public:
     processLib::ExitCode stopImpl()
     {
         processLib::ExitCode exit_code{};
-        TerminateProcess(_process_info.hProcess, exit_code);
+        auto                 ret = TerminateProcess(_process_info.hProcess, exit_code);
+        if (ret == 0) { throw std::runtime_error("Stop process failed: " + lastErrorToString(GetLastError())); }
+
         _exit_code = exit_code;
         return exit_code;
     }

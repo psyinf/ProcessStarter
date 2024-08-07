@@ -1,4 +1,4 @@
-#include <processLib/core/lib.hpp>
+#include <processLib/core/processLib.hpp>
 #include <processLib/core/processCRTP.hpp>
 
 processLib::Process::Process(const std::string& name, const Arguments& arguments)
@@ -10,7 +10,7 @@ processLib::Process::Process(const std::string& name, const Arguments& arguments
 
 processLib::Process::~Process()
 {
-    if (!getExitCode().has_value()) { stop(); }
+    if (isRunning()) { stop(); }
 }
 
 void processLib::Process::start()

@@ -1,10 +1,12 @@
-#include <processLib/core/lib.hpp>
+#include <processLib/core/processLib.hpp>
 #include <iostream>
+
 #ifdef _WIN32
 auto arguments = processLib::Arguments{"localhost", "-t"};
 #else
 auto arguments = processLib::Arguments{"localhost"};
 #endif
+
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
     using namespace std::chrono_literals;
