@@ -8,6 +8,16 @@ processLib::Process::Process(const std::string& name, const Arguments& arguments
 {
 }
 
+processLib::Process::Process(const std::string& name,
+                             const std::string& path,
+                             const Arguments&   arguments,
+                             const Policies&    policies)
+
+  : _config({name, path, arguments, policies})
+  , _process(new detail::Process(_config))
+{
+}
+
 processLib::Process::~Process()
 {
     if (isRunning()) { stop(); }
@@ -18,7 +28,7 @@ void processLib::Process::start()
     _process->start();
 }
 
-processLib::ExitCode processLib::Process::stop()
+processLib::OptionalExitCode processLib::Process::stop()
 {
     return _process->stop();
 }

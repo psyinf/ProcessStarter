@@ -19,6 +19,8 @@ class Process
 public:
     Process(const std::string& name, const Arguments& arguments);
 
+    Process(const std::string& name, const std::string& path, const Arguments& arguments, const Policies& policies);
+
     ~Process();
 
     /**
@@ -26,10 +28,10 @@ public:
      */
     void start();
     /**
-     * @brief stop the process
-     * @return the exit code of the process
+     * @brief stop the process. Depending on the configuration an exception may be thrown if the process is not running
+     * @return the optional exit code of the process.
      */
-    ExitCode stop();
+    OptionalExitCode stop();
     /**
      * @brief wait for the process to finish
      * @param timeout the maximum time to wait for the process to finish, default is infinite
@@ -42,7 +44,7 @@ public:
      * @brief get the exit code of the process
      * @return the exit code of the process
      */
-    std::optional<ExitCode> getExitCode() const;
+    OptionalExitCode getExitCode() const;
 
     /**
      * @brief get the configuration of the process

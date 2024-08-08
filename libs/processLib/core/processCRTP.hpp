@@ -18,7 +18,7 @@ public:
 
     void start() { static_cast<Derived*>(this)->startImpl(); }
 
-    processLib::ExitCode stop() { return static_cast<Derived*>(this)->stopImpl(); }
+    processLib::OptionalExitCode stop() { return static_cast<Derived*>(this)->stopImpl(); }
 
     std::future<processLib::ExitCode> wait(std::chrono::system_clock::duration timeout)
     {
@@ -71,26 +71,34 @@ public:
         auto        param_str = std::ranges::fold_left(
             _config.arguments | std::views::join_with(std::string{" "}), std::string{}, std::plus<>{});
         command_line += " " + param_str;
-        CreateProcess(nullptr,
-                      fromString(command_line),
-                      nullptr,
-                      nullptr,
-                      TRUE,
-                      0,
-                      nullptr,
-                      fromString(_config.path),
-                      &startup_info,
-                      &_process_info);
+        auto result = CreateProcess(nullptr,
+                                    fromString(command_line),
+                                    nullptr,
+                                    nullptr,
+                                    TRUE,
+                                    0,
+                                    nullptr,
+                                    fromString(_config.path),
+                                    &startup_info,
+                                    &_process_info);
+
+        if (result == 0) { throw std::runtime_error("Create process failed: " + lastErrorToString(GetLastError())); }
     }
 
-    processLib::ExitCode stopImpl()
+    processLib::OptionalExitCode stopImpl()
     {
         processLib::ExitCode exit_code{};
         auto                 ret = TerminateProcess(_process_info.hProcess, exit_code);
-        if (ret == 0) { throw std::runtime_error("Stop process failed: " + lastErrorToString(GetLastError())); }
+        if (ret == 0)
+        {
+            if (_config.policies.throwIfAlreadyStopped)
+            {
+                throw std::runtime_error("Stop process failed: " + lastErrorToString(GetLastError()));
+            }
+        }
+        else { _exit_code = exit_code; }
 
-        _exit_code = exit_code;
-        return exit_code;
+        return _exit_code;
     }
 
     std::future<processLib::OptionalExitCode> wait(std::chrono::system_clock::duration timeout)
@@ -136,7 +144,7 @@ public:
 private:
     PROCESS_INFORMATION _process_info = {0};
 
-    std::optional<processLib::ExitCode> _exit_code = std::nullopt;
+    processLib::OptionalExitCode _exit_code = std::nullopt;
 };
 #endif
 } // namespace detail
