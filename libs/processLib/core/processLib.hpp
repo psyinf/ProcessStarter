@@ -9,7 +9,7 @@
 namespace detail {
 class Process;
 
-}
+} // namespace detail
 
 namespace processLib {
 
@@ -19,9 +19,17 @@ class Process
 public:
     Process(const std::string& name, const Arguments& arguments);
 
-    Process(const std::string& name, const std::string& path, const Arguments& arguments, const Policies& policies);
+    Process(const std::string& name,
+            const std::string& path,
+            const Arguments&   arguments,
+            const Policies&    policies = Policies());
 
     ~Process();
+
+    // move constructor
+    Process(Process&&) noexcept = default;
+    // move assignment
+    Process& operator=(Process&&) noexcept = default;
 
     /**
      *  @brief Start the process
@@ -78,7 +86,7 @@ public:
 
 private:
     ProcessConfig                    _config;
-    std::unique_ptr<detail::Process> _process;
+    std::shared_ptr<detail::Process> _process; // TODO: replace with unique_ptr, but incomplete type is not yet solved
 };
 
 } // namespace processLib

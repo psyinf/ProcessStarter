@@ -16,6 +16,8 @@ public:
     {
     }
 
+    virtual ~ProcessCRTP() = default;
+
     void start() { static_cast<Derived*>(this)->startImpl(); }
 
     processLib::OptionalExitCode stop() { return static_cast<Derived*>(this)->stopImpl(); }
