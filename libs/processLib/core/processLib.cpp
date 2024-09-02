@@ -20,7 +20,7 @@ processLib::Process::Process(const std::string& name,
 
 processLib::Process::~Process()
 {
-    if (isRunning()) { stop(); }
+    if (_process && isRunning()) { stop(); }
 }
 
 void processLib::Process::start()

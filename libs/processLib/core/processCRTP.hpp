@@ -73,12 +73,15 @@ public:
         auto        param_str = std::ranges::fold_left(
             _config.arguments | std::views::join_with(std::string{" "}), std::string{}, std::plus<>{});
         command_line += " " + param_str;
+        DWORD creation_flags = 0;
+        if (_config.policies.startDetached) { creation_flags |= DETACHED_PROCESS; }
+        if (_config.policies.createNewConsole) { creation_flags |= CREATE_NEW_CONSOLE; }
         auto result = CreateProcess(nullptr,
                                     fromString(command_line),
                                     nullptr,
                                     nullptr,
                                     TRUE,
-                                    0,
+                                    creation_flags,
                                     nullptr,
                                     fromString(_config.path),
                                     &startup_info,

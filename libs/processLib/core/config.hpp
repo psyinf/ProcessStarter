@@ -1,5 +1,6 @@
 #pragma once
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -12,7 +13,11 @@ struct Policies
 {
     bool stopOnWait = false; // if waiting for the process termination, stop the process if the timeout is reached
     // before the process terminates
-    bool throwIfAlreadyStopped = false; // attempting to stop and non-runnign job will throw an exception
+    bool throwIfAlreadyStopped = false; // attempting to stop and non-running job will throw an exception
+    bool startDetached = false;         // start the process detached from the current process
+    bool createNewConsole = false;      // create a new console for the process, not compatible with startDetached
+
+    static Policies defaultPolicies() { return Policies{}; }
 
     // monadic interface
     Policies& withStopOnWait(bool stopOnWait = true)
@@ -24,6 +29,26 @@ struct Policies
     Policies& withThrowIfAlreadyStopped(bool throwIfAlreadyStopped = true)
     {
         this->throwIfAlreadyStopped = throwIfAlreadyStopped;
+        return *this;
+    }
+
+    Policies& withStartDetached(bool startDetached = true)
+    {
+        if (startDetached && createNewConsole)
+        {
+            throw std::invalid_argument("Cannot start detached and create a new console");
+        }
+        this->startDetached = startDetached;
+        return *this;
+    }
+
+    Policies& withCreateNewConsole(bool createNewConsole = true)
+    {
+        if (startDetached && createNewConsole)
+        {
+            throw std::invalid_argument("Cannot start detached and create a new console");
+        }
+        this->createNewConsole = createNewConsole;
         return *this;
     }
 };

@@ -1,4 +1,4 @@
-project(ProcessStarter)
+project(testApp)
 
 set(CMAKE_CXX_STANDARD 23)
 file(GLOB_RECURSE HEADER_FILES 	CONFIGURE_DEPENDS "*.h*")
@@ -7,17 +7,16 @@ file(GLOB_RECURSE CPP_FILES 	CONFIGURE_DEPENDS "*.cpp")
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${CPP_FILES} )
 
 CPMAddPackage(
-	NAME nlohmann_json
-	GITHUB_REPOSITORY nlohmann/json
-	GIT_TAG v3.11.3
-
+	NAME CLI11
+	GITHUB_REPOSITORY CLIUtils/CLI11
+	VERSION 1.9.1
 )
 
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
 	processLib::processLib
-	nlohmann_json::nlohmann_json
+	CLI11::CLI11
 )
 target_include_directories(${PROJECT_NAME}
 	PRIVATE

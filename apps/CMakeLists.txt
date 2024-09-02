@@ -1,1 +1,2 @@
 add_subdirectory(ProcessStarter)
+add_subdirectory(testApp)

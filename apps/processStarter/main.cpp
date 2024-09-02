@@ -1,17 +1,21 @@
 #include <processLib/core/processLib.hpp>
-#include <ProcessStarter.hpp>
+#include <processInfo.hpp>
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
     auto processInfoList = std::vector<processStarter::ProcessInfo>{
-
-        {.name = "ping", .path = "", .arguments = {{.option = "localhost"}}},
-        {.name = "ping", .path = "", .arguments = {{.option = "localhost"}, {.option = "-t"}}}};
+        {.name = "testApp",
+         .path = "",
+         .arguments = {{.option = "-t 100"}},
+         .policies = processLib::Policies::defaultPolicies().withCreateNewConsole()} //,
+        //    {.name = "testApp", .path = "", .arguments = {{.option = "-t 10000"}, {.option = "-d 10"}}}
+    };
 
     auto processList = std::vector<processLib::Process>{};
     for (const auto& processInfo : processInfoList)
     {
-        processLib::Process process(processInfo.name, processInfo.path, processInfo.getArgumentString());
+        processLib::Process process(
+            processInfo.name, processInfo.path, processInfo.getArgumentString(), processInfo.policies);
         process.start();
         processList.emplace_back(std::move(process));
     }
@@ -20,11 +24,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
         process.wait().get();
         process.stop();
     }
-
-    //     using namespace std::chrono_literals;
-    //     processLib::Process process(std::string("ping"), processLib::Arguments{"localhost", "-t"});
-    //     process.start();
-    //     process.wait().get();
 
     return 0;
 }
