@@ -1,2 +1,2 @@
-add_subdirectory(ProcessStarter)
+add_subdirectory(processStarter)
 add_subdirectory(testApp)

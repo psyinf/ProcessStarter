@@ -1,5 +1,6 @@
 #pragma once
 
+#include <processLib/core/processLib.hpp>
 #include <string>
 #include <vector>
 #include <ranges>
@@ -34,15 +35,9 @@ struct ProcessInfo
     }
 };
 
-// nlohman json serialization
-namespace serialization {
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(processStarter::Argument, option)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(processLib::Policies,
-                                   stopOnWait,
-                                   throwIfAlreadyStopped,
-                                   startDetached,
-                                   createNewConsole)
+struct ProcessInfoList
+{
+    std::vector<ProcessInfo> processInfoList;
+};
 
-// NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ProcessInfo, name, path, arguments)
-} // namespace serialization
 } // namespace processStarter

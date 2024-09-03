@@ -1,0 +1,11 @@
+---
+processInfoList:
+- arguments:
+  - option: "-t 100"
+  name: testApp
+  path: ''
+  policies:
+    createNewConsole: true
+    startDetached: false
+    stopOnWait: false
+    throwIfAlreadyStopped: false
