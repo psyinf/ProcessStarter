@@ -1,13 +1,13 @@
-project(sampleLib)
+project(processLib)
 
 add_library(${PROJECT_NAME} STATIC)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
     PRIVATE
-    core/lib.cpp
+    "core/processLib.cpp"
     PUBLIC
-    core/lib.hpp
+    core/processLib.hpp
 
 )
 

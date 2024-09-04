@@ -1,1 +1,2 @@
-add_subdirectory(_template)
+add_subdirectory(processStarter)
+add_subdirectory(testApp)
