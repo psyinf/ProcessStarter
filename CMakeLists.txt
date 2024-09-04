@@ -26,7 +26,7 @@ endif()
 install(DIRECTORY
         data/
     DESTINATION
-        data
+        ${CMAKE_INSTALL_BINDIR}/data
     COMPONENT
         ${RUNTIME_COMPONENT}
 )

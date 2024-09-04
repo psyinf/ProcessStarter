@@ -25,12 +25,22 @@ CPMADDPACKAGE(
 	GIT_TAG 0.8.0
 )
 
+CPMADDPACKAGE(
+	NAME ftxgui
+	GITHUB_REPOSITORY arthursonzogni/ftxui
+	GIT_TAG        v5.0.0
+	GIT_PROGRESS TRUE
+)
+
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
 	processLib::processLib
 	nlohmann_json::nlohmann_json
 	CLI11::CLI11
 	yaml-cpp::yaml-cpp
+	ftxui::screen
+	ftxui::dom
+	ftxui::component
 )
 target_include_directories(${PROJECT_NAME}
 	PRIVATE
