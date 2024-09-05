@@ -25,6 +25,19 @@ processLib::Process::~Process()
 
 void processLib::Process::start()
 {
+    if (_process->isRunning())
+    {
+        switch (_config.policies.multiInstancePolicy)
+        {
+        case Policies::StartAlredyRunningPolicy::Restart:
+            stop();
+            break;
+        case Policies::StartAlredyRunningPolicy::Throw:
+            throw std::runtime_error("Process already running");
+        case Policies::StartAlredyRunningPolicy::Ignore:
+            return;
+        }
+    }
     _process->start();
 }
 

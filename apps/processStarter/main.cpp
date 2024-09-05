@@ -3,6 +3,8 @@
 #include <processInfo.hpp>
 #include <iostream>
 #include <fstream>
+
+#include <string>
 #include <nlohmann/json.hpp>
 #include <CLI/CLI.hpp>
 
@@ -33,35 +35,57 @@ Component MakeOne(Element&& e)
     return Make<Impl>(std::move(e));
 }
 
-void renderTUI(const processStarter::ProcessInfoList& processInfos, std::vector<processLib::Process>& processes)
+auto style = ButtonOption::Animated(Color::Default, Color::GrayDark, Color::Default, Color::White);
+
+auto makeButtonContainer(const std::string& label, std::function<void()> action)
 {
+    auto buttonContainer = Container::Horizontal({});
+    auto button = Button(label, action, style);
+    buttonContainer->Add(button);
+    return buttonContainer;
+};
+
+struct ProcessData
+{
+    processStarter::ProcessInfo          processInfo;
+    std::shared_ptr<processLib::Process> process;
+};
+
+void renderTUI2(const std::vector<ProcessData>& processesData)
+{
+    std::string current = "";
+
+    auto style = ButtonOption::Animated(Color::Default, Color::GrayDark, Color::Default, Color::White);
+
     auto container = Container::Vertical({});
-    auto on_off = std::vector<std::string>{"Off", "On"};
-
-    container->Add(MakeOne(text("Choose your options:")));
-
-    for (const auto& [index, process] : processInfos.processInfoList | std::views::enumerate)
+    for (const auto& [index, processData] : (processesData | std::views::enumerate))
     {
-        auto container_hbox = Container::Horizontal({});
-        container_hbox->Add(MakeOne(text(process.name) | flex));
-        // container_hbox->Add(Toggle(&on_off, &selections.at(index)));
-        // button
-        auto& process = processes.at(index);
-        auto  isRunning = process.isRunning();
-        container_hbox->Add(Button(isRunning ? "Stop" : "Start", [&] {
-            auto isRunning2 = process.isRunning();
-            if (isRunning2)
-                process.stop();
-            else
-                process.start();
-            isRunning2 = true;
-        }));
-        container->Add(container_hbox);
+        auto button = Button(
+            "Button " + processData.processInfo.name, [&]() { processData.process->start(); }, style);
+        container->Add(button);
     }
+    auto renderProcess = [&](const ProcessData& info, Element e) {
+        auto style = (info.process->isRunning()) ? dim : bold;
 
+        return hbox({
+            text(info.processInfo.name) | style | size(WIDTH, EQUAL, 20),
+            separator(),
+            text(info.process->isRunning() ? "Running" : "Stopped"),
+            separator(),
+            e,
+        });
+    };
     auto renderer = Renderer(container, [&] {
-        // return container->Render() | vscroll_indicator | frame | size(HEIGHT, LESS_THAN, 10) | border;
-        return container->Render();
+        std::vector<Element> entries;
+
+        for (const auto& [index, process] : (processesData | std::views::enumerate))
+            entries.push_back(renderProcess(process, container->ChildAt(index)->Render()));
+
+        return vbox({
+                   vbox(std::move(entries)),
+
+               }) |
+               border;
     });
 
     auto screen = ScreenInteractive::FitComponent();
@@ -77,16 +101,21 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 
     CLI11_PARSE(app, argc, argv);
     // load process list
-    auto processInfo = processStarter::loadFromFile(processList);
+    auto processInfos = processStarter::loadFromFile(processList);
     // make a list of processes
-    std::vector<processLib::Process> processes;
-    for (const auto& processInfo : processInfo.processInfoList)
+    std::vector<std::shared_ptr<processLib::Process>> processes;
+    for (const auto& processInfo : processInfos.processInfoList)
     {
-        processes.emplace_back(processLib::Process(
+        processes.emplace_back(std::make_shared<processLib::Process>(
             processInfo.name, processInfo.path, processInfo.getArgumentString(), processInfo.policies));
     }
     // render TUI
-    renderTUI(processInfo, processes);
-
+    // renderTUI(processInfo, processes);
+    std::vector<ProcessData> processesData;
+    for (size_t i = 0; i < processInfos.processInfoList.size(); ++i)
+    {
+        processesData.push_back({processInfos.processInfoList[i], processes[i]});
+    }
+    renderTUI2(processesData);
     return 0;
 }

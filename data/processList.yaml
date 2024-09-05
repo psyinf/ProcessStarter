@@ -1,7 +1,7 @@
 ---
 processInfoList:
 - arguments:
-  - option: "-t 100"
+  - option: "-t 10"
   name: testApp
   path: ''
   policies:
@@ -9,7 +9,7 @@ processInfoList:
     
 - arguments:
   - option: "-t 1100"
-  name: testApp
+  name: testApp2
   path: ''
   policies:
     createNewConsole: true

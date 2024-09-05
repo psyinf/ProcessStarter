@@ -11,11 +11,27 @@ using OptionalExitCode = std::optional<ExitCode>;
 
 struct Policies
 {
+    // TODO:     enum StartPolicy
+    //     {
+    //         Detached,
+    //         NewConsole
+    //     };
+
+    enum class StartAlredyRunningPolicy
+    {
+        Restart,  // stop the process and start a new one
+        Multiple, // start a new process even if the process is already running, this will effectively create multiple
+                  // no-longer controllable processes
+        Throw,    // throw an exception if the process is already running
+        Ignore    // ignore the request to start the process
+    };
+
     bool stopOnWait = false; // if waiting for the process termination, stop the process if the timeout is reached
     // before the process terminates
     bool throwIfAlreadyStopped = false; // attempting to stop and non-running job will throw an exception
     bool startDetached = false;         // start the process detached from the current process
     bool createNewConsole = false;      // create a new console for the process, not compatible with startDetached
+    StartAlredyRunningPolicy multiInstancePolicy = StartAlredyRunningPolicy::Ignore;
 
     static Policies defaultPolicies() { return Policies{}; }
 

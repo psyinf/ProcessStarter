@@ -30,6 +30,9 @@ public:
     Process(Process&&) noexcept = default;
     // move assignment
     Process& operator=(Process&&) noexcept = default;
+    // dissallow copy
+    Process(const Process&) = delete;
+    Process& operator=(const Process&) = delete;
 
     /**
      *  @brief Start the process
